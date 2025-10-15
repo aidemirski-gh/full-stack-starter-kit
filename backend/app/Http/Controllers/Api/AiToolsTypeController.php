@@ -16,4 +16,19 @@ class AiToolsTypeController extends Controller
             'data' => $types
         ]);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
+        $type = AiToolsType::create($validated);
+
+        return response()->json([
+            'message' => 'AI tools type created successfully',
+            'data' => $type
+        ], 201);
+    }
 }

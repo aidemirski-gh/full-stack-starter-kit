@@ -16,4 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    // AI Tools Types protected routes
+    Route::post('/ai-tools-types', [AiToolsTypeController::class, 'store']);
 });
