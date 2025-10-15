@@ -29,7 +29,7 @@ export default function AddAiToolPage() {
     documentation: '',
     description: '',
     usage: '',
-    ai_tools_type_id: '',
+    selectedTypes: [] as number[],
     selectedRoles: [] as number[],
   });
 
@@ -90,6 +90,15 @@ export default function AddAiToolPage() {
     }));
   };
 
+  const handleTypeToggle = (typeId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedTypes: prev.selectedTypes.includes(typeId)
+        ? prev.selectedTypes.filter(id => id !== typeId)
+        : [...prev.selectedTypes, typeId]
+    }));
+  };
+
   const handleRoleToggle = (roleId: number) => {
     setFormData(prev => ({
       ...prev,
@@ -124,8 +133,8 @@ export default function AddAiToolPage() {
       return;
     }
 
-    if (!formData.ai_tools_type_id) {
-      setFormError('Please select an AI tool type');
+    if (formData.selectedTypes.length === 0) {
+      setFormError('Please select at least one AI tool type');
       return;
     }
 
@@ -156,7 +165,7 @@ export default function AddAiToolPage() {
           documentation: formData.documentation || null,
           description: formData.description,
           usage: formData.usage,
-          ai_tools_type_id: parseInt(formData.ai_tools_type_id),
+          ai_tools_type_ids: formData.selectedTypes,
           role_ids: formData.selectedRoles,
         }),
       });
@@ -242,31 +251,39 @@ export default function AddAiToolPage() {
               />
             </div>
 
-            {/* AI Tool Type */}
+            {/* AI Tool Types */}
             <div>
-              <label htmlFor="ai_tools_type_id" className="block text-sm font-medium text-gray-700 mb-1">
-                AI Tool Type <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                AI Tool Types <span className="text-red-500">*</span>
               </label>
-              <select
-                id="ai_tools_type_id"
-                name="ai_tools_type_id"
-                value={formData.ai_tools_type_id}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
-                disabled={submitting}
-              >
-                <option value="">Select a type</option>
+              <p className="text-xs text-gray-500 mb-3">
+                Select one or more types that describe this AI tool
+              </p>
+              <div className="space-y-2">
                 {aiToolsTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
+                  <div
+                    key={type.id}
+                    className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50"
+                  >
+                    <input
+                      type="checkbox"
+                      id={`type-${type.id}`}
+                      checked={formData.selectedTypes.includes(type.id)}
+                      onChange={() => handleTypeToggle(type.id)}
+                      className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      disabled={submitting}
+                    />
+                    <label htmlFor={`type-${type.id}`} className="ml-3 flex-1 cursor-pointer">
+                      <span className="block text-sm font-medium text-gray-900">
+                        {type.name}
+                      </span>
+                      <span className="block text-xs text-gray-500">
+                        {type.description}
+                      </span>
+                    </label>
+                  </div>
                 ))}
-              </select>
-              {formData.ai_tools_type_id && (
-                <p className="mt-1 text-xs text-gray-500">
-                  {aiToolsTypes.find(t => t.id === parseInt(formData.ai_tools_type_id))?.description}
-                </p>
-              )}
+              </div>
             </div>
 
             {/* Website Link */}

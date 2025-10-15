@@ -25,6 +25,7 @@ interface AiTool {
   created_at: string;
   roles?: Role[];
   ai_tools_type?: AiToolsType;
+  ai_tools_types?: AiToolsType[];
 }
 
 export default function AiToolsPage() {
@@ -143,17 +144,22 @@ export default function AiToolsPage() {
                   {/* Tool Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h2 className="text-2xl font-bold text-gray-900">
+                      <div className="mb-2">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
                           {tool.name}
                         </h2>
-                        {tool.ai_tools_type && (
-                          <span
-                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800"
-                            title={tool.ai_tools_type.description}
-                          >
-                            {tool.ai_tools_type.name}
-                          </span>
+                        {tool.ai_tools_types && tool.ai_tools_types.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {tool.ai_tools_types.map((type) => (
+                              <span
+                                key={type.id}
+                                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800"
+                                title={type.description}
+                              >
+                                {type.name}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-3 mb-3">
