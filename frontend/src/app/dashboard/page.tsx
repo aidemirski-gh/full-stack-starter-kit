@@ -99,10 +99,6 @@ export default function DashboardPage() {
                   {user.role || 'No role'}
                 </span>
               </div>
-              <div className="flex items-center">
-                <span className="text-gray-600 font-medium w-24">User ID:</span>
-                <span className="text-gray-900">{user.id}</span>
-              </div>
             </div>
 
             <div className="mt-8 border-t pt-6">
@@ -115,6 +111,12 @@ export default function DashboardPage() {
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   View AI Tools Types
+                </Link>
+                <Link
+                  href="/users"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  View Users & Roles
                 </Link>
               </div>
             </div>

@@ -26,8 +26,8 @@ class AuthController extends Controller
             ]);
         }
 
-        // Load the role relationship
-        $user->load('role');
+        // Load the role relationships (both single and multiple)
+        $user->load(['role', 'roles']);
 
         // Create token
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -37,7 +37,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role ? $user->role->name : null,
+                'role' => $user->role ? $user->role->name : null, // Legacy single role
+                'roles' => $user->roles->pluck('name')->toArray(), // Multiple roles
             ],
             'token' => $token,
         ]);
@@ -55,14 +56,15 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
-        $user->load('role');
+        $user->load(['role', 'roles']);
 
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role ? $user->role->name : null,
+                'role' => $user->role ? $user->role->name : null, // Legacy single role
+                'roles' => $user->roles->pluck('name')->toArray(), // Multiple roles
             ],
         ]);
     }
