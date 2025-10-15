@@ -105,7 +105,7 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Quick Actions
               </h3>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 <Link
                   href="/ai-tools-types"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -117,6 +117,12 @@ export default function DashboardPage() {
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 >
                   View Users & Roles
+                </Link>
+                <Link
+                  href="/roles"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                >
+                  Manage Roles
                 </Link>
               </div>
             </div>

@@ -16,4 +16,22 @@ class RoleController extends Controller
             'data' => $roles
         ]);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:roles,name',
+            'description' => 'required|string|max:500',
+        ]);
+
+        $role = Role::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+        ]);
+
+        return response()->json([
+            'message' => 'Role created successfully',
+            'data' => $role
+        ], 201);
+    }
 }

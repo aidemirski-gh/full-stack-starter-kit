@@ -28,4 +28,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Roles routes
     Route::get('/roles', [RoleController::class, 'index']);
+    Route::post('/roles', [RoleController::class, 'store']);
 });
