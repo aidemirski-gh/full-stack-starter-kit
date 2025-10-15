@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import AppLayout from '@/components/AppLayout';
 
 interface User {
   id: number;
@@ -30,30 +31,13 @@ export default function DashboardPage() {
     setLoading(false);
   }, [router]);
 
-  const handleLogout = async () => {
-    const token = localStorage.getItem('token');
-
-    try {
-      await fetch('http://localhost:8201/api/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        },
-      });
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      router.push('/login');
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
+        <div className="animate-pulse flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full"></div>
+          <div className="text-gray-500 font-medium">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -62,40 +46,87 @@ export default function DashboardPage() {
     return null;
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700 font-medium">{user.name}</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+  const quickActions = [
+    {
+      name: 'AI Tools',
+      description: 'Browse and manage AI tools',
+      href: '/ai-tools',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      ),
+      color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-600',
+    },
+    {
+      name: 'AI Tool Types',
+      description: 'Manage AI tool categories',
+      href: '/ai-tools-types',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      ),
+      color: 'from-indigo-500 to-indigo-600',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-600',
+    },
+    {
+      name: 'Users & Roles',
+      description: 'Manage users and permissions',
+      href: '/users',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
+      color: 'from-green-500 to-green-600',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-600',
+    },
+    {
+      name: 'Roles',
+      description: 'Configure role permissions',
+      href: '/roles',
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      ),
+      color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-600',
+    },
+  ];
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Welcome, {user.name}!
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <span className="text-gray-600 font-medium w-24">Email:</span>
-                <span className="text-gray-900">{user.email}</span>
+  return (
+    <AppLayout>
+      <div className="p-6 lg:p-8">
+        {/* Welcome Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+            Welcome back, {user.name}!
+          </h1>
+          <p className="text-gray-600">
+            Here's what's happening with your AI tools today.
+          </p>
+        </div>
+
+        {/* User Info Card */}
+        <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4">
+            <h2 className="text-lg font-semibold text-white">Your Profile</h2>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Email Address</label>
+                <p className="text-gray-900 font-medium">{user.email}</p>
               </div>
-              <div className="flex items-start">
-                <span className="text-gray-600 font-medium w-24 pt-1">Roles:</span>
+              <div>
+                <label className="block text-sm font-medium text-gray-500 mb-1">Assigned Roles</label>
                 <div className="flex flex-wrap gap-2">
                   {user.roles && user.roles.length > 0 ? (
                     user.roles.map((role, index) => (
@@ -114,55 +145,112 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="mt-8 border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Quick Actions
-              </h3>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/ai-tools"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  View AI Tools
-                </Link>
-                <Link
-                  href="/ai-tools-types"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  View AI Tools Types
-                </Link>
-                <Link
-                  href="/users"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  View Users & Roles
-                </Link>
-                <Link
-                  href="/roles"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-                >
-                  Manage Roles
-                </Link>
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action) => (
+              <Link
+                key={action.name}
+                href={action.href}
+                className="group bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
+              >
+                <div className="p-6">
+                  <div className={`inline-flex p-3 rounded-lg ${action.bgColor} ${action.textColor} mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    {action.icon}
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                    {action.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {action.description}
+                  </p>
+                </div>
+                <div className={`h-1 bg-gradient-to-r ${action.color} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}></div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Authentication</p>
+                <p className="text-2xl font-bold text-green-600">Active</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
             </div>
+            <p className="text-xs text-gray-500 mt-3">Successfully authenticated with Laravel backend</p>
+          </div>
 
-            <div className="mt-8 border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Authentication Status
-              </h3>
-              <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                <p className="text-sm text-green-700">
-                  ✓ Successfully authenticated with Laravel backend
-                </p>
-                <p className="text-sm text-green-700 mt-1">
-                  ✓ API token stored in localStorage
-                </p>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">API Token</p>
+                <p className="text-2xl font-bold text-blue-600">Stored</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
               </div>
             </div>
+            <p className="text-xs text-gray-500 mt-3">API token stored securely in localStorage</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Session Status</p>
+                <p className="text-2xl font-bold text-indigo-600">Valid</p>
+              </div>
+              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">Your session is active and secure</p>
+          </div>
+        </div>
+
+        {/* Getting Started */}
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl shadow-lg p-8 text-white">
+          <h2 className="text-2xl font-bold mb-4">Getting Started</h2>
+          <p className="text-indigo-100 mb-6">
+            Explore our collection of AI tools, manage user permissions, and organize tools by categories. Everything you need to manage your AI tools ecosystem.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link
+              href="/ai-tools/add"
+              className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add New AI Tool
+            </Link>
+            <Link
+              href="/ai-tools"
+              className="inline-flex items-center px-6 py-3 bg-indigo-700 text-white font-semibold rounded-lg hover:bg-indigo-800 transition-colors duration-200"
+            >
+              Browse AI Tools
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import AppLayout from '@/components/AppLayout';
 
 interface Role {
   id: number;
@@ -23,24 +23,17 @@ export default function UsersPage() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', selectedRoles: [] as number[] });
   const [formError, setFormError] = useState('');
   const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem('user');
     const token = localStorage.getItem('token');
 
     if (!token) {
       router.push('/login');
       return;
-    }
-
-    if (userData) {
-      setUser(JSON.parse(userData));
     }
 
     // Fetch users and roles
@@ -80,25 +73,6 @@ export default function UsersPage() {
     fetchData();
   }, [router]);
 
-  const handleLogout = async () => {
-    const token = localStorage.getItem('token');
-
-    try {
-      await fetch('http://localhost:8201/api/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        },
-      });
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      router.push('/login');
-    }
-  };
 
   const handleRoleToggle = (roleId: number) => {
     setFormData(prev => ({
@@ -165,52 +139,22 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">Loading...</div>
-      </div>
+      <AppLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-pulse flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full"></div>
+            <div className="text-gray-500 font-medium">Loading...</div>
+          </div>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center gap-6">
-              <Link href="/" className="text-xl font-bold text-gray-900">
-                Home
-              </Link>
-              {user && (
-                <>
-                  <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
-                    Dashboard
-                  </Link>
-                  <Link href="/ai-tools-types" className="text-gray-600 hover:text-gray-900">
-                    AI Tools Types
-                  </Link>
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              {user && (
-                <>
-                  <span className="text-gray-700 font-medium">{user.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Logout
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg p-6">
+    <AppLayout>
+      <div className="p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold text-gray-900">
                 Users and Assigned Roles
@@ -403,6 +347,6 @@ export default function UsersPage() {
           </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
 
 interface Role {
@@ -16,8 +16,11 @@ interface AiToolsType {
   description: string;
 }
 
-export default function AddAiToolPage() {
+export default function EditAiToolPage() {
   const router = useRouter();
+  const params = useParams();
+  const id = params.id as string;
+
   const [roles, setRoles] = useState<Role[]>([]);
   const [aiToolsTypes, setAiToolsTypes] = useState<AiToolsType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +39,7 @@ export default function AddAiToolPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [id]);
 
   const fetchData = async () => {
     try {
@@ -46,8 +49,14 @@ export default function AddAiToolPage() {
         return;
       }
 
-      // Fetch roles and AI tools types in parallel
-      const [rolesResponse, typesResponse] = await Promise.all([
+      // Fetch AI tool, roles, and AI tools types in parallel
+      const [toolResponse, rolesResponse, typesResponse] = await Promise.all([
+        fetch(`http://localhost:8201/api/ai-tools/${id}`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }),
         fetch('http://localhost:8201/api/roles', {
           headers: {
             'Accept': 'application/json',
@@ -61,21 +70,39 @@ export default function AddAiToolPage() {
         }),
       ]);
 
-      if (rolesResponse.status === 401) {
+      if (toolResponse.status === 401 || rolesResponse.status === 401) {
         localStorage.removeItem('token');
         router.push('/login');
         return;
+      }
+
+      if (!toolResponse.ok) {
+        throw new Error('Failed to fetch AI tool');
       }
 
       if (!rolesResponse.ok || !typesResponse.ok) {
         throw new Error('Failed to fetch data');
       }
 
+      const toolResult = await toolResponse.json();
       const rolesResult = await rolesResponse.json();
       const typesResult = await typesResponse.json();
 
+      const tool = toolResult.data;
+
       setRoles(rolesResult.data);
       setAiToolsTypes(typesResult.data);
+
+      // Populate form with existing data
+      setFormData({
+        name: tool.name,
+        link: tool.link,
+        documentation: tool.documentation || '',
+        description: tool.description,
+        usage: tool.usage,
+        selectedTypes: tool.ai_tools_types?.map((t: AiToolsType) => t.id) || [],
+        selectedRoles: tool.roles?.map((r: Role) => r.id) || [],
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -115,12 +142,12 @@ export default function AddAiToolPage() {
 
     // Validation
     if (!formData.name.trim()) {
-      setFormError('AI Tool name is required');
+      setFormError('Name is required');
       return;
     }
 
     if (!formData.link.trim()) {
-      setFormError('Website link is required');
+      setFormError('Link is required');
       return;
     }
 
@@ -130,7 +157,7 @@ export default function AddAiToolPage() {
     }
 
     if (!formData.usage.trim()) {
-      setFormError('Usage information is required');
+      setFormError('Usage is required');
       return;
     }
 
@@ -149,12 +176,12 @@ export default function AddAiToolPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        router.push('/login');
+        setFormError('You must be logged in to update an AI tool');
         return;
       }
 
-      const response = await fetch('http://localhost:8201/api/ai-tools', {
-        method: 'POST',
+      const response = await fetch(`http://localhost:8201/api/ai-tools/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -171,25 +198,13 @@ export default function AddAiToolPage() {
         }),
       });
 
-      if (response.status === 401) {
-        localStorage.removeItem('token');
-        router.push('/login');
-        return;
-      }
-
-      const result = await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        if (result.errors) {
-          const errorMessages = Object.values(result.errors).flat().join(', ');
-          setFormError(errorMessages);
-        } else {
-          setFormError(result.message || 'Failed to create AI tool');
-        }
-        return;
+        throw new Error(data.message || 'Failed to update AI tool');
       }
 
-      // Success - redirect to AI tools page
+      // Redirect to AI tools list page on success
       router.push('/ai-tools');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'An error occurred');
@@ -235,16 +250,16 @@ export default function AddAiToolPage() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Add New AI Tool</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Edit AI Tool</h1>
             <p className="text-gray-600">
-              Fill in the details to add a new AI tool to the directory
+              Update the details of this AI tool
             </p>
           </div>
 
           {/* Form */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:p-8">
           {formError && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {formError}
             </div>
           )}
@@ -252,8 +267,8 @@ export default function AddAiToolPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                AI Tool Name <span className="text-red-500">*</span>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -261,10 +276,81 @@ export default function AddAiToolPage() {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
-                placeholder="e.g., ChatGPT, Claude, DALL-E"
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="e.g., ChatGPT"
+                required
                 disabled={submitting}
-                maxLength={255}
+              />
+            </div>
+
+            {/* Link */}
+            <div>
+              <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-2">
+                Link <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="url"
+                id="link"
+                name="link"
+                value={formData.link}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="https://example.com"
+                required
+                disabled={submitting}
+              />
+            </div>
+
+            {/* Documentation */}
+            <div>
+              <label htmlFor="documentation" className="block text-sm font-medium text-gray-700 mb-2">
+                Documentation Link
+              </label>
+              <input
+                type="url"
+                id="documentation"
+                name="documentation"
+                value={formData.documentation}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="https://docs.example.com"
+                disabled={submitting}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                Description <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Describe what this AI tool does..."
+                required
+                disabled={submitting}
+              />
+            </div>
+
+            {/* Usage */}
+            <div>
+              <label htmlFor="usage" className="block text-sm font-medium text-gray-700 mb-2">
+                Usage <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="usage"
+                name="usage"
+                value={formData.usage}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Explain how to use this AI tool..."
+                required
+                disabled={submitting}
               />
             </div>
 
@@ -278,10 +364,7 @@ export default function AddAiToolPage() {
               </p>
               <div className="space-y-2">
                 {aiToolsTypes.map((type) => (
-                  <div
-                    key={type.id}
-                    className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50"
-                  >
+                  <div key={type.id} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
                     <input
                       type="checkbox"
                       id={`type-${type.id}`}
@@ -303,90 +386,17 @@ export default function AddAiToolPage() {
               </div>
             </div>
 
-            {/* Website Link */}
-            <div>
-              <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-1">
-                Website Link <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                id="link"
-                name="link"
-                value={formData.link}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
-                placeholder="https://example.com"
-                disabled={submitting}
-                maxLength={255}
-              />
-            </div>
-
-            {/* Documentation Link */}
-            <div>
-              <label htmlFor="documentation" className="block text-sm font-medium text-gray-700 mb-1">
-                Documentation Link <span className="text-gray-400">(Optional)</span>
-              </label>
-              <input
-                type="url"
-                id="documentation"
-                name="documentation"
-                value={formData.documentation}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
-                placeholder="https://docs.example.com"
-                disabled={submitting}
-                maxLength={255}
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
-                placeholder="Provide a detailed description of the AI tool, its capabilities, and what makes it unique..."
-                disabled={submitting}
-              />
-            </div>
-
-            {/* Usage */}
-            <div>
-              <label htmlFor="usage" className="block text-sm font-medium text-gray-700 mb-1">
-                Usage <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="usage"
-                name="usage"
-                value={formData.usage}
-                onChange={handleInputChange}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900"
-                placeholder="Describe how to use the tool, common use cases, access methods, pricing, etc..."
-                disabled={submitting}
-              />
-            </div>
-
             {/* Roles */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Accessible by Roles <span className="text-red-500">*</span>
               </label>
               <p className="text-xs text-gray-500 mb-3">
-                Select one or more roles that can access this AI tool
+                Select which roles can access this AI tool
               </p>
               <div className="space-y-2">
                 {roles.map((role) => (
-                  <div
-                    key={role.id}
-                    className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50"
-                  >
+                  <div key={role.id} className="flex items-start p-3 border border-gray-200 rounded-md hover:bg-gray-50">
                     <input
                       type="checkbox"
                       id={`role-${role.id}`}
@@ -413,7 +423,7 @@ export default function AddAiToolPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-indigo-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 {submitting ? (
                   <>
@@ -421,14 +431,14 @@ export default function AddAiToolPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Creating...
+                    Updating...
                   </>
                 ) : (
                   <>
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Create AI Tool
+                    Update AI Tool
                   </>
                 )}
               </button>

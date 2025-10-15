@@ -54,4 +54,83 @@ class AiToolController extends Controller
             'data' => $aiTool
         ], 201);
     }
+
+    public function show($id)
+    {
+        $aiTool = AiTool::with(['roles', 'aiToolsType', 'aiToolsTypes'])->find($id);
+
+        if (!$aiTool) {
+            return response()->json([
+                'message' => 'AI Tool not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $aiTool
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $aiTool = AiTool::find($id);
+
+        if (!$aiTool) {
+            return response()->json([
+                'message' => 'AI Tool not found'
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'link' => 'required|url|max:255',
+            'documentation' => 'nullable|url|max:255',
+            'description' => 'required|string',
+            'usage' => 'required|string',
+            'ai_tools_type_ids' => 'required|array|min:1',
+            'ai_tools_type_ids.*' => 'exists:ai_tools_types,id',
+            'role_ids' => 'required|array|min:1',
+            'role_ids.*' => 'exists:roles,id',
+        ]);
+
+        $aiTool->update([
+            'name' => $validated['name'],
+            'link' => $validated['link'],
+            'documentation' => $validated['documentation'] ?? null,
+            'description' => $validated['description'],
+            'usage' => $validated['usage'],
+            'ai_tools_type_id' => $validated['ai_tools_type_ids'][0], // Keep legacy field for backward compatibility
+        ]);
+
+        // Sync AI tools types (replace existing with new)
+        $aiTool->aiToolsTypes()->sync($validated['ai_tools_type_ids']);
+
+        // Sync roles (replace existing with new)
+        $aiTool->roles()->sync($validated['role_ids']);
+
+        // Load relationships for response
+        $aiTool->load(['roles', 'aiToolsType', 'aiToolsTypes']);
+
+        return response()->json([
+            'message' => 'AI Tool updated successfully',
+            'data' => $aiTool
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $aiTool = AiTool::find($id);
+
+        if (!$aiTool) {
+            return response()->json([
+                'message' => 'AI Tool not found'
+            ], 404);
+        }
+
+        // Delete the AI tool (relationships will be deleted automatically due to cascade)
+        $aiTool->delete();
+
+        return response()->json([
+            'message' => 'AI Tool deleted successfully'
+        ]);
+    }
 }
