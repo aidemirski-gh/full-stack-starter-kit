@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   role: string | null;
+  roles?: string[];
 }
 
 export default function DashboardPage() {
@@ -93,11 +94,24 @@ export default function DashboardPage() {
                 <span className="text-gray-600 font-medium w-24">Email:</span>
                 <span className="text-gray-900">{user.email}</span>
               </div>
-              <div className="flex items-center">
-                <span className="text-gray-600 font-medium w-24">Role:</span>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                  {user.role || 'No role'}
-                </span>
+              <div className="flex items-start">
+                <span className="text-gray-600 font-medium w-24 pt-1">Roles:</span>
+                <div className="flex flex-wrap gap-2">
+                  {user.roles && user.roles.length > 0 ? (
+                    user.roles.map((role, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
+                      >
+                        {role}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                      No roles assigned
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
