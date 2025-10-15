@@ -33,4 +33,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // AI Tools routes
     Route::get('/ai-tools', [AiToolController::class, 'index']);
+    Route::post('/ai-tools', [AiToolController::class, 'store']);
 });
