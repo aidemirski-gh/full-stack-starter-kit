@@ -20,4 +20,12 @@ class Role extends Model
     {
         return $this->belongsToMany(User::class)->withTimestamps();
     }
+
+    /**
+     * Get the AI tools that this role can access.
+     */
+    public function aiTools(): BelongsToMany
+    {
+        return $this->belongsToMany(AiTool::class)->withTimestamps();
+    }
 }

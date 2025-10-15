@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AiToolsTypeController;
+use App\Http\Controllers\Api\AiToolController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -29,4 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Roles routes
     Route::get('/roles', [RoleController::class, 'index']);
     Route::post('/roles', [RoleController::class, 'store']);
+
+    // AI Tools routes
+    Route::get('/ai-tools', [AiToolController::class, 'index']);
 });
