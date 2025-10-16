@@ -33,15 +33,23 @@ interface AiTool {
 export default function AiToolsPage() {
   const router = useRouter();
   const [aiTools, setAiTools] = useState<AiTool[]>([]);
+  const [filteredTools, setFilteredTools] = useState<AiTool[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [aiToolsTypes, setAiToolsTypes] = useState<AiToolsType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  // Filter states
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>('');
+  const [searchName, setSearchName] = useState<string>('');
+
   useEffect(() => {
-    fetchAiTools();
+    fetchData();
   }, []);
 
-  const fetchAiTools = async () => {
+  const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -50,25 +58,46 @@ export default function AiToolsPage() {
       }
 
       const apiUrl = getApiUrl();
-      const response = await fetch(`${apiUrl}/ai-tools`, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
 
-      if (response.status === 401) {
+      // Fetch AI tools, roles, and types in parallel
+      const [toolsResponse, rolesResponse, typesResponse] = await Promise.all([
+        fetch(`${apiUrl}/ai-tools`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }),
+        fetch(`${apiUrl}/roles`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        }),
+        fetch(`${apiUrl}/ai-tools-types`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+        }),
+      ]);
+
+      if (toolsResponse.status === 401 || rolesResponse.status === 401) {
         localStorage.removeItem('token');
         router.push('/login');
         return;
       }
 
-      if (!response.ok) {
+      if (!toolsResponse.ok) {
         throw new Error('Failed to fetch AI tools');
       }
 
-      const result = await response.json();
-      setAiTools(result.data);
+      const toolsResult = await toolsResponse.json();
+      const rolesResult = rolesResponse.ok ? await rolesResponse.json() : { data: [] };
+      const typesResult = typesResponse.ok ? await typesResponse.json() : { data: [] };
+
+      setAiTools(toolsResult.data);
+      setFilteredTools(toolsResult.data);
+      setRoles(rolesResult.data);
+      setAiToolsTypes(typesResult.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -105,12 +134,54 @@ export default function AiToolsPage() {
       }
 
       // Remove the deleted tool from the list
-      setAiTools(aiTools.filter(tool => tool.id !== id));
+      const updatedTools = aiTools.filter(tool => tool.id !== id);
+      setAiTools(updatedTools);
+      applyFilters(updatedTools, selectedRole, selectedType, searchName);
     } catch (err) {
       alert(err instanceof Error ? err.message : 'An error occurred while deleting');
     } finally {
       setDeletingId(null);
     }
+  };
+
+  // Apply filters whenever filter values change
+  useEffect(() => {
+    applyFilters(aiTools, selectedRole, selectedType, searchName);
+  }, [selectedRole, selectedType, searchName, aiTools]);
+
+  const applyFilters = (tools: AiTool[], roleFilter: string, typeFilter: string, nameFilter: string) => {
+    let filtered = [...tools];
+
+    // Filter by role
+    if (roleFilter) {
+      filtered = filtered.filter(tool =>
+        tool.roles?.some(role => role.id.toString() === roleFilter)
+      );
+    }
+
+    // Filter by type
+    if (typeFilter) {
+      filtered = filtered.filter(tool =>
+        tool.ai_tools_types?.some(type => type.id.toString() === typeFilter)
+      );
+    }
+
+    // Filter by name (search)
+    if (nameFilter.trim()) {
+      const searchLower = nameFilter.toLowerCase();
+      filtered = filtered.filter(tool =>
+        tool.name.toLowerCase().includes(searchLower) ||
+        tool.description.toLowerCase().includes(searchLower)
+      );
+    }
+
+    setFilteredTools(filtered);
+  };
+
+  const handleResetFilters = () => {
+    setSelectedRole('');
+    setSelectedType('');
+    setSearchName('');
   };
 
   if (loading) {
@@ -152,7 +223,7 @@ export default function AiToolsPage() {
           <div>
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">AI Tools Directory</h1>
             <p className="text-gray-600">
-              Explore our collection of {aiTools.length} powerful AI tools
+              Showing {filteredTools.length} of {aiTools.length} AI tools
             </p>
           </div>
           <button
@@ -164,6 +235,155 @@ export default function AiToolsPage() {
             </svg>
             Add New AI Tool
           </button>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filters
+            </h2>
+            {(selectedRole || selectedType || searchName) && (
+              <button
+                onClick={handleResetFilters}
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset Filters
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Name Search */}
+            <div>
+              <label htmlFor="search-name" className="block text-sm font-medium text-gray-700 mb-2">
+                Search by Name
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="search-name"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                  placeholder="Type to search..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900 placeholder-gray-400"
+                />
+                <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Role Filter */}
+            <div>
+              <label htmlFor="filter-role" className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Role
+              </label>
+              <div className="relative">
+                <select
+                  id="filter-role"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white transition-colors text-gray-900"
+                >
+                  <option value="">All Roles</option>
+                  {roles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
+                <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <svg className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Type Filter */}
+            <div>
+              <label htmlFor="filter-type" className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Type
+              </label>
+              <div className="relative">
+                <select
+                  id="filter-type"
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-white transition-colors text-gray-900"
+                >
+                  <option value="">All Types</option>
+                  {aiToolsTypes.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+                <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <svg className="absolute right-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {(selectedRole || selectedType || searchName) && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-600 mb-2">Active filters:</p>
+              <div className="flex flex-wrap gap-2">
+                {searchName && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                    Name: "{searchName}"
+                    <button
+                      onClick={() => setSearchName('')}
+                      className="ml-1.5 hover:text-blue-900"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                )}
+                {selectedRole && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                    Role: {roles.find(r => r.id.toString() === selectedRole)?.name}
+                    <button
+                      onClick={() => setSelectedRole('')}
+                      className="ml-1.5 hover:text-purple-900"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                )}
+                {selectedType && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                    Type: {aiToolsTypes.find(t => t.id.toString() === selectedType)?.name}
+                    <button
+                      onClick={() => setSelectedType('')}
+                      className="ml-1.5 hover:text-green-900"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* AI Tools Grid */}
@@ -180,9 +400,26 @@ export default function AiToolsPage() {
               Add your first AI tool
             </button>
           </div>
+        ) : filteredTools.length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+            <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p className="text-gray-700 text-lg font-medium mb-2">No AI tools match your filters</p>
+            <p className="text-gray-500 mb-4">Try adjusting your search criteria</p>
+            <button
+              onClick={handleResetFilters}
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Reset Filters
+            </button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6">
-            {aiTools.map((tool) => (
+            {filteredTools.map((tool) => (
               <div
                 key={tool.id}
                 className="group bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
@@ -362,7 +599,7 @@ export default function AiToolsPage() {
         )}
 
         {/* Summary */}
-        {aiTools.length > 0 && (
+        {filteredTools.length > 0 && (
           <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -372,8 +609,15 @@ export default function AiToolsPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total AI Tools</p>
-                  <p className="text-2xl font-bold text-gray-900">{aiTools.length}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {(selectedRole || selectedType || searchName) ? 'Filtered Results' : 'Total AI Tools'}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {filteredTools.length}
+                    {(selectedRole || selectedType || searchName) && (
+                      <span className="text-base font-normal text-gray-500 ml-2">of {aiTools.length}</span>
+                    )}
+                  </p>
                 </div>
               </div>
               <button
