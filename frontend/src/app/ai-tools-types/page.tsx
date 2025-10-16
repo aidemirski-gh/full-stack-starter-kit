@@ -36,7 +36,7 @@ export default function AiToolsTypesPage() {
       try {
         const apiUrl = getApiUrl();
 
-        const response = await fetch(`${apiUrl}/api/ai-tools-types`, {
+        const response = await fetch(`${apiUrl}/ai-tools-types`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -64,7 +64,7 @@ export default function AiToolsTypesPage() {
     try {
       const apiUrl = getApiUrl();
 
-      await fetch(`${apiUrl}/api/logout`, {
+      await fetch(`${apiUrl}/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -96,7 +96,7 @@ export default function AiToolsTypesPage() {
     try {
       const apiUrl = getApiUrl();
 
-      const response = await fetch(`${apiUrl}/api/ai-tools-types`, {
+      const response = await fetch(`${apiUrl}/ai-tools-types`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

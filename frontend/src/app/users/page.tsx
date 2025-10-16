@@ -43,13 +43,13 @@ export default function UsersPage() {
         const apiUrl = getApiUrl();
 
         const [usersResponse, rolesResponse] = await Promise.all([
-          fetch(`${apiUrl}/api/users`, {
+          fetch(`${apiUrl}/users`, {
             headers: {
               'Accept': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
           }),
-          fetch(`${apiUrl}/api/roles`, {
+          fetch(`${apiUrl}/roles`, {
             headers: {
               'Accept': 'application/json',
               'Authorization': `Bearer ${token}`,
@@ -108,7 +108,7 @@ export default function UsersPage() {
     try {
       const apiUrl = getApiUrl();
 
-      const response = await fetch(`${apiUrl}/api/users`, {
+      const response = await fetch(`${apiUrl}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

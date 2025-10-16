@@ -51,13 +51,13 @@ export default function AddAiToolPage() {
 
       // Fetch roles and AI tools types in parallel
       const [rolesResponse, typesResponse] = await Promise.all([
-        fetch(`${apiUrl}/api/roles`, {
+        fetch(`${apiUrl}/roles`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch(`${apiUrl}/api/ai-tools-types`, {
+        fetch(`${apiUrl}/ai-tools-types`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -158,7 +158,7 @@ export default function AddAiToolPage() {
 
       const apiUrl = getApiUrl();
 
-      const response = await fetch(`${apiUrl}/api/ai-tools`, {
+      const response = await fetch(`${apiUrl}/ai-tools`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

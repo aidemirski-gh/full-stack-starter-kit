@@ -54,19 +54,19 @@ export default function EditAiToolPage() {
 
       // Fetch AI tool, roles, and AI tools types in parallel
       const [toolResponse, rolesResponse, typesResponse] = await Promise.all([
-        fetch(`${apiUrl}/api/ai-tools/${id}`, {
+        fetch(`${apiUrl}/ai-tools/${id}`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch(`${apiUrl}/api/roles`, {
+        fetch(`${apiUrl}/roles`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch(`${apiUrl}/api/ai-tools-types`, {
+        fetch(`${apiUrl}/ai-tools-types`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -185,7 +185,7 @@ export default function EditAiToolPage() {
 
       const apiUrl = getApiUrl();
 
-      const response = await fetch(`${apiUrl}/api/ai-tools/${id}`, {
+      const response = await fetch(`${apiUrl}/ai-tools/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

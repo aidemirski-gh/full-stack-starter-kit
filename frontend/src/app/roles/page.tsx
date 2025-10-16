@@ -38,7 +38,7 @@ export default function RolesPage() {
 
       const apiUrl = getApiUrl();
 
-      const response = await fetch(`${apiUrl}/api/roles`, {
+      const response = await fetch(`${apiUrl}/roles`, {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -100,7 +100,7 @@ export default function RolesPage() {
 
       const apiUrl = getApiUrl();
 
-      const response = await fetch(`${apiUrl}/api/roles`, {
+      const response = await fetch(`${apiUrl}/roles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
