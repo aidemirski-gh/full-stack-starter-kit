@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/verify-2fa', [AuthController::class, 'verify2FA']);
+Route::post('/resend-2fa', [AuthController::class, 'resend2FA']);
 Route::get('/ai-tools-types', [AiToolsTypeController::class, 'index']);
 
 // Protected routes

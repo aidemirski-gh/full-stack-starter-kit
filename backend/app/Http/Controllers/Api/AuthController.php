@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +12,13 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected $twoFactorService;
+
+    public function __construct(TwoFactorService $twoFactorService)
+    {
+        $this->twoFactorService = $twoFactorService;
+    }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -23,6 +31,39 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        // Send 2FA code
+        $this->twoFactorService->sendVerificationCode(
+            $user,
+            'login',
+            $request->ip(),
+            $request->userAgent()
+        );
+
+        // Return response indicating 2FA is required
+        return response()->json([
+            'requires_2fa' => true,
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'message' => 'Verification code sent to your email',
+        ]);
+    }
+
+    public function verify2FA(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'code' => 'required|string|size:6',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+
+        // Verify the code
+        if (!$this->twoFactorService->verifyCode($user, $request->code, 'login')) {
+            throw ValidationException::withMessages([
+                'code' => ['The verification code is invalid or has expired.'],
             ]);
         }
 
@@ -41,6 +82,27 @@ class AuthController extends Controller
                 'roles' => $user->roles->pluck('name')->toArray(), // Multiple roles
             ],
             'token' => $token,
+        ]);
+    }
+
+    public function resend2FA(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+
+        // Send new verification code
+        $this->twoFactorService->sendVerificationCode(
+            $user,
+            'login',
+            $request->ip(),
+            $request->userAgent()
+        );
+
+        return response()->json([
+            'message' => 'New verification code sent to your email',
         ]);
     }
 

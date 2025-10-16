@@ -33,7 +33,14 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store token and user info
+      // Check if 2FA is required
+      if (data.requires_2fa) {
+        // Redirect to 2FA verification page
+        router.push(`/verify-2fa?user_id=${data.user_id}&email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+
+      // Store token and user info (for backward compatibility if 2FA is disabled)
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
