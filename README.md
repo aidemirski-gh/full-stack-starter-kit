@@ -28,6 +28,41 @@ Location: /home/softart/scripts/vibecode-full-stack-starter-kit
    ./stop.sh
    ```
 
+## 📱 Mobile Access
+
+Access the application from your mobile device on the same Wi-Fi network!
+
+### Quick Setup (Windows)
+
+**Option 1: Automatic (Recommended)**
+```bash
+# Run as Administrator
+.\enable-mobile-access.bat
+```
+
+**Option 2: PowerShell**
+```powershell
+# Run as Administrator
+.\enable-mobile-access.ps1
+```
+
+### Manual Setup
+
+1. **Open Windows Firewall ports 8200 and 8201**
+2. **Find your computer's IP address:** `ipconfig`
+3. **Restart containers:** `docker compose down && docker compose up -d`
+4. **Access from mobile:** `http://YOUR-IP:8200`
+
+📖 **For detailed instructions, see [MOBILE_ACCESS.md](MOBILE_ACCESS.md)**
+
+### Features for Mobile
+
+✅ Fully responsive design
+✅ Touch-optimized interface
+✅ Mobile-friendly navigation
+✅ Auto-detecting API endpoints
+✅ Optimized forms and buttons
+
 ## 🔧 Management Scripts
 
 - `./start.sh` - Start all services with auto-setup

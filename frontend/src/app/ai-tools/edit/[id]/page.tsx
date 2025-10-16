@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { getApiUrl } from '@/lib/config';
 
 interface Role {
   id: number;
@@ -49,21 +50,23 @@ export default function EditAiToolPage() {
         return;
       }
 
+      const apiUrl = getApiUrl();
+
       // Fetch AI tool, roles, and AI tools types in parallel
       const [toolResponse, rolesResponse, typesResponse] = await Promise.all([
-        fetch(`http://localhost:8201/api/ai-tools/${id}`, {
+        fetch(`${apiUrl}/api/ai-tools/${id}`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch('http://localhost:8201/api/roles', {
+        fetch(`${apiUrl}/api/roles`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch('http://localhost:8201/api/ai-tools-types', {
+        fetch(`${apiUrl}/api/ai-tools-types`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -180,7 +183,9 @@ export default function EditAiToolPage() {
         return;
       }
 
-      const response = await fetch(`http://localhost:8201/api/ai-tools/${id}`, {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/api/ai-tools/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

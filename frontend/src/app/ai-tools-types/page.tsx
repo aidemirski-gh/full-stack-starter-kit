@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getApiUrl } from '@/lib/config';
 
 interface AiToolsType {
   id: number;
@@ -33,7 +34,9 @@ export default function AiToolsTypesPage() {
     // Fetch AI tools types
     const fetchTypes = async () => {
       try {
-        const response = await fetch('http://localhost:8201/api/ai-tools-types', {
+        const apiUrl = getApiUrl();
+
+        const response = await fetch(`${apiUrl}/api/ai-tools-types`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -59,7 +62,9 @@ export default function AiToolsTypesPage() {
     const token = localStorage.getItem('token');
 
     try {
-      await fetch('http://localhost:8201/api/logout', {
+      const apiUrl = getApiUrl();
+
+      await fetch(`${apiUrl}/api/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -89,7 +94,9 @@ export default function AiToolsTypesPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8201/api/ai-tools-types', {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/api/ai-tools-types`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

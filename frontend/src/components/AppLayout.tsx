@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ReactNode, useState, useEffect } from 'react';
+import { getApiUrl } from '@/lib/config';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -25,7 +26,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
     const token = localStorage.getItem('token');
 
     try {
-      await fetch('http://localhost:8201/api/logout', {
+      const apiUrl = getApiUrl();
+      await fetch(`${apiUrl}/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

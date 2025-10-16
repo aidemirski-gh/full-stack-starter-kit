@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { getApiUrl } from '@/lib/config';
 
 interface Role {
   id: number;
@@ -48,7 +49,8 @@ export default function AiToolsPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:8201/api/ai-tools', {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/ai-tools`, {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -88,7 +90,8 @@ export default function AiToolsPage() {
         return;
       }
 
-      const response = await fetch(`http://localhost:8201/api/ai-tools/${id}`, {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/ai-tools/${id}`, {
         method: 'DELETE',
         headers: {
           'Accept': 'application/json',

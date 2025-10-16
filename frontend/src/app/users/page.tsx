@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { getApiUrl } from '@/lib/config';
 
 interface Role {
   id: number;
@@ -39,14 +40,16 @@ export default function UsersPage() {
     // Fetch users and roles
     const fetchData = async () => {
       try {
+        const apiUrl = getApiUrl();
+
         const [usersResponse, rolesResponse] = await Promise.all([
-          fetch('http://localhost:8201/api/users', {
+          fetch(`${apiUrl}/api/users`, {
             headers: {
               'Accept': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
           }),
-          fetch('http://localhost:8201/api/roles', {
+          fetch(`${apiUrl}/api/roles`, {
             headers: {
               'Accept': 'application/json',
               'Authorization': `Bearer ${token}`,
@@ -103,7 +106,9 @@ export default function UsersPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:8201/api/users', {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/api/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import { getApiUrl } from '@/lib/config';
 
 interface Role {
   id: number;
@@ -46,15 +47,17 @@ export default function AddAiToolPage() {
         return;
       }
 
+      const apiUrl = getApiUrl();
+
       // Fetch roles and AI tools types in parallel
       const [rolesResponse, typesResponse] = await Promise.all([
-        fetch('http://localhost:8201/api/roles', {
+        fetch(`${apiUrl}/api/roles`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
         }),
-        fetch('http://localhost:8201/api/ai-tools-types', {
+        fetch(`${apiUrl}/api/ai-tools-types`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -153,7 +156,9 @@ export default function AddAiToolPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:8201/api/ai-tools', {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/api/ai-tools`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

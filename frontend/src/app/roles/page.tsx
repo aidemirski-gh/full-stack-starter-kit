@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getApiUrl } from '@/lib/config';
 
 interface Role {
   id: number;
@@ -35,7 +36,9 @@ export default function RolesPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:8201/api/roles', {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/api/roles`, {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -95,7 +98,9 @@ export default function RolesPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:8201/api/roles', {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/api/roles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
