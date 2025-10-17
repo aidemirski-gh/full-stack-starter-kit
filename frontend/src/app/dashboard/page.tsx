@@ -4,14 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AppLayout from '@/components/AppLayout';
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string | null;
-  roles?: string[];
-}
+import { User } from '@/types';
 
 export default function DashboardPage() {
   const router = useRouter();

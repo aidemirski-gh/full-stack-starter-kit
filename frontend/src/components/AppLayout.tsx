@@ -4,6 +4,14 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ReactNode, useState, useEffect } from 'react';
 import { getApiUrl } from '@/lib/config';
+import { User } from '@/types';
+
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: ReactNode;
+  requiredRole: string | null;
+}
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -12,8 +20,8 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -47,7 +55,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isOwner = user?.roles?.includes('owner') || user?.role === 'owner';
 
   // Define all navigation items with role requirements
-  const allNavigationItems = [
+  const allNavigationItems: NavigationItem[] = [
     {
       name: 'Dashboard',
       href: '/dashboard',

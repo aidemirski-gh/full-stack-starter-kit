@@ -4,31 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
 import { getApiUrl } from '@/lib/config';
-
-interface Role {
-  id: number;
-  name: string;
-  description: string;
-}
-
-interface AiToolsType {
-  id: number;
-  name: string;
-  description: string;
-}
-
-interface AiTool {
-  id: number;
-  name: string;
-  link: string;
-  documentation: string | null;
-  description: string;
-  usage: string;
-  created_at: string;
-  roles?: Role[];
-  ai_tools_type?: AiToolsType;
-  ai_tools_types?: AiToolsType[];
-}
+import { Role, AiToolsType, AiTool } from '@/types';
 
 export default function AiToolsPage() {
   const router = useRouter();

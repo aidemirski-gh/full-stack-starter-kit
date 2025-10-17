@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Log;
 
 class AiToolController extends Controller
 {
+    /**
+     * Get all AI tools with role-based filtering.
+     *
+     * Owners see all tools, other users see only tools assigned to their roles.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
         $user = $request->user();
@@ -43,6 +51,12 @@ class AiToolController extends Controller
         ]);
     }
 
+    /**
+     * Create a new AI tool.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -85,6 +99,12 @@ class AiToolController extends Controller
         ], 201);
     }
 
+    /**
+     * Get a specific AI tool by ID.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
         $aiTool = AiTool::with(['roles', 'aiToolsType', 'aiToolsTypes'])->find($id);
@@ -100,6 +120,13 @@ class AiToolController extends Controller
         ]);
     }
 
+    /**
+     * Update an existing AI tool.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $aiTool = AiTool::find($id);
@@ -150,6 +177,12 @@ class AiToolController extends Controller
         ]);
     }
 
+    /**
+     * Delete an AI tool.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         $aiTool = AiTool::find($id);
