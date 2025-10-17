@@ -17,6 +17,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'active' => $user->active,
                 'roles' => $user->roles->map(function ($role) {
                     return [
                         'id' => $role->id,
@@ -39,6 +40,7 @@ class UserController extends Controller
             'password' => ['required', Password::defaults()],
             'role_ids' => 'required|array|min:1',
             'role_ids.*' => 'exists:roles,id',
+            'active' => 'sometimes|boolean',
         ]);
 
         // Create user
@@ -46,6 +48,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'active' => $validated['active'] ?? true, // Default to true if not provided
         ]);
 
         // Assign roles
@@ -60,6 +63,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'active' => $user->active,
                 'roles' => $user->roles->map(function ($role) {
                     return [
                         'id' => $role->id,
@@ -68,5 +72,39 @@ class UserController extends Controller
                 }),
             ]
         ], 201);
+    }
+
+    /**
+     * Update user's active status
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'active' => 'required|boolean',
+        ]);
+
+        $user->update([
+            'active' => $validated['active'],
+        ]);
+
+        $user->load('roles');
+
+        return response()->json([
+            'message' => 'User status updated successfully',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'active' => $user->active,
+                'roles' => $user->roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                    ];
+                }),
+            ]
+        ]);
     }
 }

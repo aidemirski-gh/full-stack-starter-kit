@@ -16,6 +16,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  active: boolean;
   roles: Role[];
 }
 
@@ -140,6 +141,44 @@ export default function UsersPage() {
       setFormError(err.message || 'An error occurred');
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  const handleToggleActive = async (userId: number, currentStatus: boolean) => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setError('You must be logged in');
+      return;
+    }
+
+    try {
+      const apiUrl = getApiUrl();
+
+      const response = await fetch(`${apiUrl}/users/${userId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          active: !currentStatus,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update user status');
+      }
+
+      // Update the user in the list
+      setUsers(users.map(user =>
+        user.id === userId ? { ...user, active: !currentStatus } : user
+      ));
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
     }
   };
 
@@ -305,12 +344,18 @@ export default function UsersPage() {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Assigned Roles
                     </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Status
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {users.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-3 py-4 text-sm text-gray-500 text-center">
+                      <td colSpan={5} className="px-3 py-4 text-sm text-gray-500 text-center">
                         No users found
                       </td>
                     </tr>
@@ -340,6 +385,27 @@ export default function UsersPage() {
                               ))
                             )}
                           </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            userData.active
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {userData.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm">
+                          <button
+                            onClick={() => handleToggleActive(userData.id, userData.active)}
+                            className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                              userData.active
+                                ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                : 'bg-green-100 text-green-700 hover:bg-green-200'
+                            }`}
+                          >
+                            {userData.active ? 'Deactivate' : 'Activate'}
+                          </button>
                         </td>
                       </tr>
                     ))

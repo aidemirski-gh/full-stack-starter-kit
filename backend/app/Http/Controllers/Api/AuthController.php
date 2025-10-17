@@ -34,6 +34,13 @@ class AuthController extends Controller
             ]);
         }
 
+        // Check if user is active
+        if (!$user->active) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account has been deactivated. Please contact an administrator.'],
+            ]);
+        }
+
         // Send 2FA code
         $this->twoFactorService->sendVerificationCode(
             $user,
