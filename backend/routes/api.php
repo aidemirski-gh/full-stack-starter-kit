@@ -25,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // AI Tools Types protected routes (owner only)
     Route::post('/ai-tools-types', [AiToolsTypeController::class, 'store'])
         ->middleware('role:owner');
+    Route::post('/ai-tools-types/clear-cache', [AiToolsTypeController::class, 'clearCache'])
+        ->middleware('role:owner');
 
     // Users routes (owner only)
     Route::get('/users', [UserController::class, 'index'])

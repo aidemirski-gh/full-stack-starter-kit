@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AiTool;
+use App\Services\CacheService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AiToolController extends Controller
 {
@@ -48,6 +50,10 @@ class AiToolController extends Controller
 
         // Load relationships for response
         $aiTool->load(['roles', 'aiToolsType', 'aiToolsTypes']);
+
+        // Invalidate AI tools types cache (to update tool counts)
+        CacheService::forget('ai_tools_types:with_counts');
+        Log::info('Cache invalidated after creating AI tool: ' . $aiTool->id);
 
         return response()->json([
             'message' => 'AI Tool created successfully',
@@ -110,6 +116,10 @@ class AiToolController extends Controller
         // Load relationships for response
         $aiTool->load(['roles', 'aiToolsType', 'aiToolsTypes']);
 
+        // Invalidate AI tools types cache (to update tool counts)
+        CacheService::forget('ai_tools_types:with_counts');
+        Log::info('Cache invalidated after updating AI tool: ' . $aiTool->id);
+
         return response()->json([
             'message' => 'AI Tool updated successfully',
             'data' => $aiTool
@@ -128,6 +138,10 @@ class AiToolController extends Controller
 
         // Delete the AI tool (relationships will be deleted automatically due to cascade)
         $aiTool->delete();
+
+        // Invalidate AI tools types cache (to update tool counts)
+        CacheService::forget('ai_tools_types:with_counts');
+        Log::info('Cache invalidated after deleting AI tool: ' . $id);
 
         return response()->json([
             'message' => 'AI Tool deleted successfully'

@@ -9,6 +9,7 @@ interface AiToolsType {
   id: number;
   name: string;
   description: string;
+  tools_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -274,12 +275,15 @@ export default function AiToolsTypesPage() {
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Description
                     </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      Tools Count
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {types.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="px-3 py-4 text-sm text-gray-500 text-center">
+                      <td colSpan={4} className="px-3 py-4 text-sm text-gray-500 text-center">
                         No AI tools types found
                       </td>
                     </tr>
@@ -294,6 +298,11 @@ export default function AiToolsTypesPage() {
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-700">
                           {type.description}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                            {type.tools_count || 0} tools
+                          </span>
                         </td>
                       </tr>
                     ))
