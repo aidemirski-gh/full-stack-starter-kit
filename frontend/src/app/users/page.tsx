@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppLayout from '@/components/AppLayout';
+import RoleProtected from '@/components/RoleProtected';
 import { getApiUrl } from '@/lib/config';
 
 interface Role {
@@ -156,9 +157,10 @@ export default function UsersPage() {
   }
 
   return (
-    <AppLayout>
-      <div className="p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
+    <RoleProtected requiredRoles={['owner']}>
+      <AppLayout>
+        <div className="p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold text-gray-900">
@@ -353,5 +355,6 @@ export default function UsersPage() {
         </div>
       </div>
     </AppLayout>
+    </RoleProtected>
   );
 }

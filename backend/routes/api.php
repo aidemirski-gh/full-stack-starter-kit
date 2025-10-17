@@ -22,21 +22,31 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // AI Tools Types protected routes
-    Route::post('/ai-tools-types', [AiToolsTypeController::class, 'store']);
+    // AI Tools Types protected routes (owner only)
+    Route::post('/ai-tools-types', [AiToolsTypeController::class, 'store'])
+        ->middleware('role:owner');
 
-    // Users routes
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
+    // Users routes (owner only)
+    Route::get('/users', [UserController::class, 'index'])
+        ->middleware('role:owner');
+    Route::post('/users', [UserController::class, 'store'])
+        ->middleware('role:owner');
 
-    // Roles routes
-    Route::get('/roles', [RoleController::class, 'index']);
-    Route::post('/roles', [RoleController::class, 'store']);
+    // Roles routes (owner only)
+    Route::get('/roles', [RoleController::class, 'index'])
+        ->middleware('role:owner');
+    Route::post('/roles', [RoleController::class, 'store'])
+        ->middleware('role:owner');
 
-    // AI Tools routes
-    Route::get('/ai-tools', [AiToolController::class, 'index']);
-    Route::post('/ai-tools', [AiToolController::class, 'store']);
-    Route::get('/ai-tools/{id}', [AiToolController::class, 'show']);
-    Route::put('/ai-tools/{id}', [AiToolController::class, 'update']);
-    Route::delete('/ai-tools/{id}', [AiToolController::class, 'destroy']);
+    // AI Tools routes (accessible by owner, frontend, backend)
+    Route::get('/ai-tools', [AiToolController::class, 'index'])
+        ->middleware('role:owner,frontend,backend');
+    Route::post('/ai-tools', [AiToolController::class, 'store'])
+        ->middleware('role:owner,backend');
+    Route::get('/ai-tools/{id}', [AiToolController::class, 'show'])
+        ->middleware('role:owner,frontend,backend');
+    Route::put('/ai-tools/{id}', [AiToolController::class, 'update'])
+        ->middleware('role:owner,backend');
+    Route::delete('/ai-tools/{id}', [AiToolController::class, 'destroy'])
+        ->middleware('role:owner');
 });

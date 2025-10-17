@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import RoleProtected from '@/components/RoleProtected';
 import { getApiUrl } from '@/lib/config';
 
 interface Role {
@@ -170,8 +171,9 @@ export default function RolesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <RoleProtected requiredRoles={['owner']}>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
@@ -353,5 +355,6 @@ export default function RolesPage() {
         </div>
       </div>
     </div>
+    </RoleProtected>
   );
 }
