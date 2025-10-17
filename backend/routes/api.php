@@ -36,9 +36,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{id}/status', [UserController::class, 'updateStatus'])
         ->middleware('role:owner');
 
-    // Roles routes (owner only)
+    // Roles routes
+    // GET: accessible by owner, frontend, backend (for filtering AI tools)
+    // POST: owner only (for creating roles)
     Route::get('/roles', [RoleController::class, 'index'])
-        ->middleware('role:owner');
+        ->middleware('role:owner,frontend,backend');
     Route::post('/roles', [RoleController::class, 'store'])
         ->middleware('role:owner');
 

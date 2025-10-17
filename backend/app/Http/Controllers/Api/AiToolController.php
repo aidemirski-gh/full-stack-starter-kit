@@ -15,14 +15,14 @@ class AiToolController extends Controller
         $user = $request->user();
 
         // Get user's roles
-        $userRoles = $user->roles()->pluck('name')->toArray();
+        $userRoles = $user->roles()->pluck('roles.name')->toArray();
 
         // If user has 'owner' role, show all AI tools
         if (in_array('owner', $userRoles)) {
             $aiTools = AiTool::with(['roles', 'aiToolsType', 'aiToolsTypes'])->get();
         } else {
             // Otherwise, only show AI tools assigned to user's roles
-            $userRoleIds = $user->roles()->pluck('id')->toArray();
+            $userRoleIds = $user->roles()->pluck('roles.id')->toArray();
 
             if (empty($userRoleIds)) {
                 // If user has no roles, return empty array
