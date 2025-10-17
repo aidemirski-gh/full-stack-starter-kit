@@ -46,7 +46,11 @@ export default function DashboardPage() {
     return null;
   }
 
-  const quickActions = [
+  // Check if user has owner role
+  const isOwner = user.roles?.includes('owner') || user.role === 'owner';
+
+  // Define all available quick actions
+  const allQuickActions = [
     {
       name: 'AI Tools',
       description: 'Browse and manage AI tools',
@@ -59,6 +63,7 @@ export default function DashboardPage() {
       color: 'from-blue-500 to-blue-600',
       bgColor: 'bg-blue-50',
       textColor: 'text-blue-600',
+      requiredRole: null, // Available to all users
     },
     {
       name: 'AI Tool Types',
@@ -72,6 +77,7 @@ export default function DashboardPage() {
       color: 'from-indigo-500 to-indigo-600',
       bgColor: 'bg-indigo-50',
       textColor: 'text-indigo-600',
+      requiredRole: null, // Available to all users
     },
     {
       name: 'Users & Roles',
@@ -85,6 +91,7 @@ export default function DashboardPage() {
       color: 'from-green-500 to-green-600',
       bgColor: 'bg-green-50',
       textColor: 'text-green-600',
+      requiredRole: 'owner', // Owner only
     },
     {
       name: 'Roles',
@@ -98,8 +105,16 @@ export default function DashboardPage() {
       color: 'from-purple-500 to-purple-600',
       bgColor: 'bg-purple-50',
       textColor: 'text-purple-600',
+      requiredRole: 'owner', // Owner only
     },
   ];
+
+  // Filter quick actions based on user role
+  const quickActions = allQuickActions.filter(action => {
+    if (action.requiredRole === null) return true; // Available to all
+    if (action.requiredRole === 'owner') return isOwner;
+    return false;
+  });
 
   return (
     <AppLayout>
@@ -148,7 +163,7 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${isOwner ? 'lg:grid-cols-4' : 'lg:grid-cols-2'} gap-6`}>
             {quickActions.map((action) => (
               <Link
                 key={action.name}
@@ -176,18 +191,23 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl shadow-lg p-8 text-white">
           <h2 className="text-2xl font-bold mb-4">Getting Started</h2>
           <p className="text-indigo-100 mb-6">
-            Explore our collection of AI tools, manage user permissions, and organize tools by categories. Everything you need to manage your AI tools ecosystem.
+            {isOwner
+              ? 'Explore our collection of AI tools, manage user permissions, and organize tools by categories. Everything you need to manage your AI tools ecosystem.'
+              : 'Explore our collection of AI tools and organize them by categories. Browse and discover tools that can help with your work.'
+            }
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link
-              href="/ai-tools/add"
-              className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add New AI Tool
-            </Link>
+            {isOwner && (
+              <Link
+                href="/ai-tools/add"
+                className="inline-flex items-center px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add New AI Tool
+              </Link>
+            )}
             <Link
               href="/ai-tools"
               className="inline-flex items-center px-6 py-3 bg-indigo-700 text-white font-semibold rounded-lg hover:bg-indigo-800 transition-colors duration-200"
