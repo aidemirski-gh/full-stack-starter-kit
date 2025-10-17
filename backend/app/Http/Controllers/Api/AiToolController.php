@@ -10,9 +10,33 @@ use Illuminate\Support\Facades\Log;
 
 class AiToolController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $aiTools = AiTool::with(['roles', 'aiToolsType', 'aiToolsTypes'])->get();
+        $user = $request->user();
+
+        // Get user's roles
+        $userRoles = $user->roles()->pluck('name')->toArray();
+
+        // If user has 'owner' role, show all AI tools
+        if (in_array('owner', $userRoles)) {
+            $aiTools = AiTool::with(['roles', 'aiToolsType', 'aiToolsTypes'])->get();
+        } else {
+            // Otherwise, only show AI tools assigned to user's roles
+            $userRoleIds = $user->roles()->pluck('id')->toArray();
+
+            if (empty($userRoleIds)) {
+                // If user has no roles, return empty array
+                return response()->json([
+                    'data' => []
+                ]);
+            }
+
+            $aiTools = AiTool::with(['roles', 'aiToolsType', 'aiToolsTypes'])
+                ->whereHas('roles', function ($query) use ($userRoleIds) {
+                    $query->whereIn('roles.id', $userRoleIds);
+                })
+                ->get();
+        }
 
         return response()->json([
             'data' => $aiTools
