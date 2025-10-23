@@ -8,7 +8,7 @@ frontend/.next/
 frontend/out/
 
 # Laravel
-backend/vendor/
+#backend/vendor/
 backend/storage/logs/*.log
 backend/storage/framework/cache/*
 backend/storage/framework/sessions/*
