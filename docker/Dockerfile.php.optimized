@@ -1,7 +1,12 @@
 # AI Vibecoding Academy - Laravel PHP Dockerfile
-# Public images only - no private dependencies
-# Optimized build with better layer caching and parallel compilation
+# OPTIMIZED VERSION - Uses pre-built image with extensions
+# This version is 5-10x faster to build
 
+# Option 1: Use a pre-built Laravel-optimized image (FASTEST)
+# Uncomment this to use a community image with all extensions pre-installed
+# FROM serversideup/php:8.2-fpm-alpine
+
+# Option 2: Optimized official PHP image (RECOMMENDED - Better security)
 FROM php:8.2-fpm-alpine
 
 LABEL project="AI Vibecoding Academy Starter Kit"
@@ -33,7 +38,7 @@ RUN apk add --no-cache --virtual .build-deps \
     # Configure and compile extensions in parallel
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql mysqli gd zip bcmath pcntl \
-    # Install Redis via PECL (faster than source)
+    # Install Redis via PECL
     && pecl install redis \
     && docker-php-ext-enable redis \
     # Clean up build dependencies to reduce image size

@@ -14,20 +14,6 @@ export default function Home() {
               AI Tools Hub
             </span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-gray-700 hover:text-indigo-600 font-medium transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              Get Started
-            </Link>
-          </div>
         </nav>
       </header>
 
@@ -50,15 +36,6 @@ export default function Home() {
             Organize by categories, control access with roles, and empower your team.
           </p>
           <div className="flex gap-4 items-center justify-center flex-col sm:flex-row">
-            <Link
-              href="/register"
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              Start Exploring
-            </Link>
             <Link
               href="/login"
               className="inline-flex items-center px-8 py-4 bg-white text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-md hover:shadow-lg border-2 border-gray-200 text-lg"
@@ -113,27 +90,6 @@ export default function Home() {
               Categorize and filter tools by type and purpose. Keep your AI toolkit organized and accessible.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="container mx-auto px-6 py-20">
-        <div className="max-w-4xl mx-auto bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-12 text-center shadow-2xl">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Transform Your AI Workflow?
-          </h2>
-          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Join teams who are already organizing and discovering AI tools more efficiently.
-          </p>
-          <Link
-            href="/register"
-            className="inline-flex items-center px-8 py-4 bg-white text-indigo-600 font-bold rounded-xl hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl text-lg"
-          >
-            Get Started Free
-            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
         </div>
       </section>
 
